@@ -1,13 +1,9 @@
 package es.urjc.code.daw.tablonanuncios;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,28 +14,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class TablonController {
 
 	@Autowired
-	private Usuario usuario;
-
-	private ConcurrentMap<Integer,Anuncio> anuncios = new ConcurrentHashMap<>();
-	private AtomicInteger lastId = new AtomicInteger();
+	private AnunciosRepository repository;
 
 	@PostConstruct
-	public void init(){
-		
-		Anuncio a1 = new Anuncio("Pepe", "Hola caracola", "XXXX");
-		a1.setId(lastId.getAndIncrement());
-		anuncios.put(a1.getId(),a1);
-		
-		Anuncio a2 = new Anuncio("Juan", "Hola caracola", "XXXX");
-		a2.setId(lastId.getAndIncrement());
-		anuncios.put(a2.getId(),a2);
+	public void init() {
+		repository.save(new Anuncio("Pepe", "Hola caracola", "XXXX"));
+		repository.save(new Anuncio("Juan", "Hola caracola", "XXXX"));
 	}
 
 	@GetMapping("/")
-	public String tablon(Model model, HttpSession session) {
+	public String tablon(Model model, Pageable page) {
 
-		model.addAttribute("anuncios", anuncios.values());
-		model.addAttribute("bienvenida", session.isNew());
+		model.addAttribute("anuncios", repository.findAll(page));
 
 		return "tablon";
 	}
@@ -47,29 +33,16 @@ public class TablonController {
 	@PostMapping("/anuncio/nuevo")
 	public String nuevoAnuncio(Model model, Anuncio anuncio) {
 
-		anuncio.setId(lastId.getAndIncrement());
-		anuncios.put(anuncio.getId(), anuncio);
-
-		usuario.setNombre(anuncio.getNombre());
-		usuario.incAnuncios();
+		repository.save(anuncio);
 
 		return "anuncio_guardado";
 
 	}
 
-	@GetMapping("/anuncio/nuevo_form")
-	public String nuevoAnuncioForm(Model model) {
-
-		model.addAttribute("nombre", usuario.getNombre());
-		model.addAttribute("num_anuncios", usuario.getNumAnuncios());
-
-		return "nuevo_anuncio";
-	}
-
 	@GetMapping("/anuncio/{id}")
-	public String nuevoAnuncio(Model model, @PathVariable int id) {
-
-		Anuncio anuncio = anuncios.get(id);
+	public String verAnuncio(Model model, @PathVariable long id) {
+		
+		Anuncio anuncio = repository.getOne(id);
 
 		model.addAttribute("anuncio", anuncio);
 
