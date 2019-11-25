@@ -1,5 +1,3 @@
-target/
+
+S3Examples/
 .vscode/
-.classpath
-.project
-.settings/
