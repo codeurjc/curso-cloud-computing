@@ -1,8 +1,8 @@
 package s3;
 
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
@@ -91,13 +91,13 @@ public class Main {
 
         // Descargamos el objeto privado y lo guardamos con otro nombre
         
-        System.out.println("Download object: "+bucketName+" from bucket: "+bucketName);
+        System.out.println("Download object: "+privateObjectName+" from bucket: "+bucketName);
         S3Object s3object = s3.getObject(bucketName, privateObjectName);
         S3ObjectInputStream inputStream = s3object.getObjectContent();
         FileUtils.copyInputStreamToFile(inputStream, new File("files/privateDataFromS3.txt"));
 
         // Esperamos a que el usuario pueda comprobar los cambios en el navegador
-        System.out.println("Open: https://"+bucketName+".s3.amazonaws.com/"+publicObjectName+" in browsery");
+        System.out.println("Open: https://"+bucketName+".s3.amazonaws.com/"+publicObjectName+" in browser");
 
         waitUser();
 
@@ -117,11 +117,10 @@ public class Main {
   }
 
   public static void waitUser(){
-        Console c = System.console();
-        if (c != null) {
-          c.format("\nPress ENTER to continue ...\n");
-          c.readLine();
-        }
+	  System.out.println("Press ENTER to continue ...");
+	  Scanner scanner = new Scanner(System.in);
+	  scanner.nextLine();
+	  scanner.close();
   }
 
   public static void listBuckets() {
