@@ -1,8 +1,0 @@
-web:
-  image: maes95/docker-compose-python-mongo
-  ports:
-    - "3000:5000"
-  links:
-    - db
-db:
-  image: mongo:3.0.2

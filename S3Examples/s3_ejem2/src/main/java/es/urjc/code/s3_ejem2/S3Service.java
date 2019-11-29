@@ -1,14 +1,13 @@
 package es.urjc.code.s3_ejem2;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
@@ -28,28 +27,26 @@ public class S3Service {
         return s3.listBuckets();
     }
 
-    public List<S3ObjectSummary> getBucket(String bucketName) {
+    public List<S3ObjectSummary> getBucketObjects(String bucketName) {
         return s3.listObjects(bucketName).getObjectSummaries();
     }
 
     public void createBucket(String bucketName) {
+        if(s3.doesBucketExistV2(bucketName)) {
+            throw new AmazonS3Exception("Bucket name already exist");
+        }
         s3.createBucket(bucketName);
     }
 
-    public void uploadFile(String bucketName, MultipartFile file) {
-        File convFile = new File(file.getOriginalFilename());
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(convFile);
-            fos.write(file.getBytes());
-            fos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void uploadFile(String bucketName, MultipartFile multiPartFile) throws IllegalStateException, IOException {
+        String fileName = multiPartFile.getOriginalFilename();
+        File file = new File(System.getProperty("java.io.tmpdir")+"/"+fileName);
+        multiPartFile.transferTo(file);
+        s3.putObject(bucketName, fileName, file);
+    }
 
-        s3.putObject(bucketName, file.getOriginalFilename(), convFile);
+    public void deleteObject(String bucketName, String objectName){
+        s3.deleteObject(bucketName, objectName);
     }
 
     public void deleteBucket(String bucketName){

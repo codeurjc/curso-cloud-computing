@@ -1,5 +1,6 @@
 package es.urjc.code.s3_ejem2;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,9 @@ public class BucketsController {
 		return s3service.getAllBuckets();
 	}
 
-	@GetMapping("/{bucketName}")
+	@GetMapping("/{bucketName}/objects")
 	public List<S3ObjectSummary> getBucket(@PathVariable String bucketName) {
-		return s3service.getBucket(bucketName);
+		return s3service.getBucketObjects(bucketName);
 	}
 
 	@PostMapping("/{bucketName}")
@@ -40,15 +41,23 @@ public class BucketsController {
 		return new ResponseEntity<>("Bucket created!", HttpStatus.CREATED);
 	}
 
-	@PostMapping("/{bucketName}/uploadFile")
-    public ResponseEntity<String> uploadFile(@PathVariable String bucketName, @RequestParam("file") MultipartFile file) {
+	@PostMapping("/{bucketName}/uploadObject")
+	public ResponseEntity<String> uploadFile(@PathVariable String bucketName, @RequestParam("file") MultipartFile file)
+			throws IllegalStateException, IOException {
         s3service.uploadFile(bucketName, file);
-		return new ResponseEntity<>("File "+file.getOriginalFilename()+" created in bucket "+bucketName, HttpStatus.CREATED);
-    }
+		return new ResponseEntity<>("Object "+file.getOriginalFilename()+" created in bucket "+bucketName, HttpStatus.CREATED);
+	}
+	
+	@DeleteMapping("/{bucketName}/{objectName}")
+	public ResponseEntity<String> deleteObject(@PathVariable String bucketName, @PathVariable String objectName) {
+		s3service.deleteObject(bucketName, objectName);
+		return new ResponseEntity<>("Object deleted!", HttpStatus.OK);
+	}
 
 	@DeleteMapping("/{bucketName}")
 	public ResponseEntity<String> deleteBucket(@PathVariable String bucketName) {
-		return new ResponseEntity<>("Bucket created!", HttpStatus.NO_CONTENT);
+		s3service.deleteBucket(bucketName);
+		return new ResponseEntity<>("Bucket deleted!", HttpStatus.OK);
 	}
 
 }
