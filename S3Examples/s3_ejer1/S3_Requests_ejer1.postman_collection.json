@@ -15,7 +15,13 @@
 					"formdata": [
 						{
 							"key": "file",
-							"type": "file"
+							"type": "file",
+							"src": []
+						},
+						{
+							"key": "isPublic",
+							"value": "true",
+							"type": "text"
 						}
 					]
 				},
@@ -122,7 +128,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/buckets/iwcn/<bucket_name>",
+					"raw": "http://localhost:8080/buckets/<bucket_name>/<object_name>",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -130,8 +136,36 @@
 					"port": "8080",
 					"path": [
 						"buckets",
-						"iwcn",
-						"<bucket_name>"
+						"<bucket_name>",
+						"<object_name>"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Copy object ",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/buckets/<bucket_name>/<object_name>/copy?destinationBucketName=<dest_bucket_name>",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"buckets",
+						"<bucket_name>",
+						"<object_name>",
+						"copy"
+					],
+					"query": [
+						{
+							"key": "destinationBucketName",
+							"value": "<dest_bucket_name>"
+						}
 					]
 				}
 			},
